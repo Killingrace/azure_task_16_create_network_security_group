@@ -1,5 +1,5 @@
 $location = "polandcentral"
-$resourceGroupName = "mate-azure-task-16"
+$resourceGroupName = "mate-resources"
 
 $virtualNetworkName = "todoapp"
 $vnetAddressPrefix = "10.20.30.0/24"
@@ -14,8 +14,11 @@ $webnsgname = $webSubnetName
 $mngnsgname = $mngSubnetName
 $dbnsgname = $dbSubnetName
 
-$webnsgrulenameHTTP = "HTTP"
+$webnsgrulenameHTTP = "HTTP/HTTPS"
 $mngnsgrulenameSSH = "SSH"
+$mngnsgruleNameName = "Internal"
+$webnsgruleNameName = "Internal"
+$dbnsgruleNameName = "Internal"
 
 Write-Host "Creating a resource group $resourceGroupName ..."
 New-AzResourceGroup -Name $resourceGroupName -Location $location
@@ -30,10 +33,10 @@ Write-Host "Creating dbSubnet network security group..."
 # Write your code for creation of management NSG here -> 
 
 $webnsgruleHTTP = New-AzNetworkSecurityRuleConfig -Name $webnsgrulenameHTTP -Access Allow -Protocol Tcp -Direction Inbound -Priority 110 -SourceAddressPrefix * -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 80, 443
-$webnsgruleInternal = New-AzNetworkSecurityRuleConfig -Name $webnsgrulenameHTTP -Access Allow -Protocol Tcp -Direction Inbound -Priority 110 -SourceAddressPrefix "10.20.30.0/24" -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 80, 443
+$webnsgruleInternal = New-AzNetworkSecurityRuleConfig -Name $webnsgruleNameName -Access Allow -Protocol Tcp -Direction Inbound -Priority 110 -SourceAddressPrefix "10.20.30.0/24" -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 80, 443
 $mngnsgruleSSH = New-AzNetworkSecurityRuleConfig -Name $mngnsgrulenameSSH -Access Allow -Protocol Tcp -Direction Inbound -Priority 100 -SourceAddressPrefix * -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 22
-$mngnsgruleInternal = New-AzNetworkSecurityRuleConfig -Name $mngnsgrulenameSSH -Access Allow -Protocol Tcp -Direction Inbound -Priority 100 -SourceAddressPrefix "10.20.30.0/24" -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 22
-$dbnsgruleInternal = New-AzNetworkSecurityRuleConfig -Name $mngnsgrulenameSSH -Access Allow -Protocol Tcp -Direction Inbound -Priority 100 -SourceAddressPrefix "10.20.30.0/24" -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 22
+$mngnsgruleInternal = New-AzNetworkSecurityRuleConfig -Name $mngnsgruleNameName -Access Allow -Protocol Tcp -Direction Inbound -Priority 100 -SourceAddressPrefix "10.20.30.0/24" -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 22
+$dbnsgruleInternal = New-AzNetworkSecurityRuleConfig -Name $dbnsgruleNameName -Access Allow -Protocol Tcp -Direction Inbound -Priority 100 -SourceAddressPrefix "10.20.30.0/24" -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 22
 
 $webnsg = New-AzNetworkSecurityGroup -Name $webnsgname -ResourceGroupName $resourceGroupName -Location $location -SecurityRules $webnsgruleHTTP, $webnsgruleInternal
 $mngnsg = New-AzNetworkSecurityGroup -Name $mngnsgname -ResourceGroupName $resourceGroupName -Location $location -SecurityRules $mngnsgruleSSH, $mngnsgruleInternal
